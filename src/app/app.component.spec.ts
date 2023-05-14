@@ -1,27 +1,20 @@
-import { TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
-import { NxWelcomeComponent } from './nx-welcome.component';
+import { Tree, joinPathFragments } from '@nrwl/devkit';
+import { createTreeWithEmptyWorkspace } from '@nrwl/devkit/testing';
 
 describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [],
-      declarations: [AppComponent, NxWelcomeComponent],
-    }).compileComponents();
-  });
+  let tree: Tree;
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain(
-      'Welcome nx-tree-children'
-    );
-  });
+  test('when a file is removed, it should not be shown in tree.children list', () => {
+    tree = createTreeWithEmptyWorkspace();
+    const targetFilePath = joinPathFragments('apps', 'test', 'file-a.json');
+    tree.write(targetFilePath, '');
 
-  it(`should have as title 'nx-tree-children'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('nx-tree-children');
+    expect(tree.exists(targetFilePath)).toBe(true);
+    expect(tree.children('apps/test').length).toBe(1);
+
+    tree.delete(targetFilePath);
+
+    expect(tree.exists(targetFilePath)).toBe(false);
+    expect(tree.children('apps/test').length).toBe(0);
   });
 });
